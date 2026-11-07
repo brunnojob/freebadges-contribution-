@@ -19,3 +19,34 @@ export const highlights=[
 ['Security advisory credit','https://docs.github.com/en/code-security/security-advisories','Receive accepted credit on an advisory in the GitHub Advisory Database.','Receba crédito aceito em um advisory no GitHub Advisory Database.'],
 ['GitHub Star','https://stars.github.com/','Recognition through the GitHub Stars program; nomination and selection are required.','Reconhecimento pelo programa GitHub Stars; exige indicação e seleção.']
 ];
+
+Object.assign(copy.en, {
+ auth:'Sign in with your GitHub token', authText:'Generate a classic personal access token in the GitHub account you want to use. Paste it here to verify your identity and connect this session.',
+ intro:'Connect your GitHub account. Choose a repository. Run four achievement workflows and generate contribution history through GitHub Pages and Actions.',
+ scope:'For Actions, select repo and workflow. Browser-only execution needs public_repo (public repos) or repo (private repos). The second account token only verifies its identity.',
+ executionMode:'Execution engine',browserMode:'This browser tab',actionsSubmitted:'Execution submitted to GitHub Actions',actionsPreparing:'Preparing your private executor and encrypting its credentials. Keep this tab open until the workflow is submitted.',actionsRunning:'The workflow runs on GitHub Actions and continues after you close this tab. Open Actions for step-by-step evidence and the downloadable report. Refresh to check its status.',
+ actionsConsent:'Actions creates a private freebadges-actions-v3 repository in your account and stores CLASSIC_PAT and, for Pair, COAUTHOR_PAT as encrypted GitHub secrets there. It uses your account’s Actions quota. Tokens are never sent to the site owner’s repository. You can remove the saved secrets after execution.',
+ actionsGuide:'GitHub Pages + Actions',readGuide:'Read the complete guide',openActions:'Open workflow execution',runStatus:'Workflow status',clearSecrets:'Remove runner credentials',secretsCleared:'Saved runner credentials removed.',actionsFailed:'The GitHub Actions run did not succeed. Inspect its logs and report before repeating.',cancelRequested:'Cancellation requested. Check Actions for the final status.',
+ historyIntro:'Choose a date range and generate explicitly labeled synthetic Git history in a repository you own. Execute on GitHub Actions or directly from this page.',
+});
+Object.assign(copy.pt, {
+ auth:'Entre com seu token do GitHub',authText:'Gere um token classic na conta GitHub que deseja usar. Cole aqui para verificar sua identidade e conectar esta sessão.',
+ intro:'Conecte sua conta GitHub. Escolha um repositório. Execute quatro fluxos de conquistas e gere histórico de contribuições pelo Pages e Actions.',
+ scope:'Para Actions, marque repo e workflow. A execução somente nesta aba usa public_repo (públicos) ou repo (privados). O token da segunda conta apenas verifica a identidade dela.',
+ executionMode:'Onde executar',browserMode:'Nesta aba do navegador',actionsSubmitted:'Execução enviada ao GitHub Actions',actionsPreparing:'Preparando seu executor privado e criptografando as credenciais. Mantenha esta aba aberta até o envio do workflow.',actionsRunning:'O workflow roda no GitHub Actions e continua após fechar esta aba. Abra Actions para ver cada etapa e baixar o relatório. Clique em Atualizar para conferir o status.',
+ actionsConsent:'Actions cria o repositório privado freebadges-actions-v3 na sua conta e salva CLASSIC_PAT e, para Pair, COAUTHOR_PAT como secrets criptografados nele. Usa a cota de Actions da sua conta. Os tokens nunca são enviados ao repositório do dono do site. Você pode remover as credenciais salvas após a execução.',
+ actionsGuide:'GitHub Pages + Actions',readGuide:'Ler o guia completo',openActions:'Abrir execução do workflow',runStatus:'Status do workflow',clearSecrets:'Remover credenciais do executor',secretsCleared:'Credenciais salvas no executor removidas.',actionsFailed:'A execução no GitHub Actions não foi concluída com sucesso. Confira os logs e o relatório antes de repetir.',cancelRequested:'Cancelamento solicitado. Confira o status final no Actions.',
+ historyIntro:'Escolha um período e gere histórico Git sintético identificado em um repositório seu. Execute pelo GitHub Actions ou diretamente nesta página.',
+});
+for(const language of ['en','pt']){
+ Object.assign(copy[language].errors, language==='pt'?{
+  PRIVATE_RUNNER_REQUIRED:'O executor precisa ser privado, da conta conectada e administrável por você.',RUNNER_CHANGED:'O código do executor foi alterado. As credenciais não foram enviadas. Confira ou exclua o executor privado antes de reinstalar.',RUNNER_PENDING:'O GitHub ainda está preparando o workflow. Aguarde e tente novamente.',
+ }: {PRIVATE_RUNNER_REQUIRED:'The executor must be private, owned by the connected account and administrable by you.',RUNNER_CHANGED:'The executor code has changed. No credentials were sent. Inspect or delete the private executor before reinstalling.',RUNNER_PENDING:'GitHub is still preparing the workflow. Wait and try again.'});
+ copy[language].logNames['actions-dispatched']=language==='pt'?'Workflow enviado ao Actions':'Workflow submitted to Actions';
+}
+
+Object.assign(copy.en,{privacy:'Session in memory · Actions secrets in your account',eligibilityNote:'GitHub evaluates badge eligibility separately. This plan will perform the operations listed above.'});
+Object.assign(copy.pt,{privacy:'Sessão em memória · Secrets na sua conta',eligibilityNote:'O GitHub avalia a elegibilidade das badges separadamente. Este plano executará as operações listadas acima.'});
+copy.en.logNames['runner-ready']='Private executor prepared';copy.pt.logNames['runner-ready']='Executor privado preparado';
+
+copy.en.cancelActions='Request Actions cancellation';copy.pt.cancelActions='Solicitar cancelamento no Actions';

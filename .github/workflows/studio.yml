@@ -11,4 +11,6 @@ jobs:
         with:
           node-version: '22'
       - run: npm test
-      - run: node --check app/js/app.js
+      - run: node scripts/build-runner.mjs
+      - run: git diff --exit-code -- docs/js/runner-manifest.js
+      - run: node --check docs/js/app.js

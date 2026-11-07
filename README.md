@@ -1,93 +1,72 @@
-# Achievement Studio
+# Freebadges Contribution
 
-**A public step-by-step guide. Four GitHub workflows running on localhost.**
+**Connect your GitHub account. Choose a repository. Execute online.**
 
-[Read the step-by-step guide](https://brunnojob.github.io/freebadges-contribution-/) · [GitHub achievement reference](https://docs.github.com/en/account-and-profile/reference/profile-reference)
+[Open the app](https://brunnojob.github.io/freebadges-contribution-/) · [Step-by-step guide](https://brunnojob.github.io/freebadges-contribution-/guide/)
 
-The GitHub Pages site at https://brunnojob.github.io/freebadges-contribution-/ is a public PT-BR / English guide only. It contains no authentication form and makes no GitHub API calls. It is independent from devstart-lab.
-
-The automation dashboard runs on your own computer at **http://localhost:4173**. Connect a classic personal access token from the account you want to use, select an owned repository, choose workflows, review the plan and execute. Pair Extraordinaire also needs a classic token from a different secondary account. Tokens stay in session memory and go directly to `api.github.com`. Internet access is required; localhost describes where the interface runs.
-
-```sh
-git clone https://github.com/brunnojob/freebadges-contribution-.git
-cd freebadges-contribution-
-npm start
-```
-
-Install Node.js 22+ first; no npm install is needed. Open http://localhost:4173 and keep the terminal open. On Windows, you can instead run `start-windows.cmd` after extracting the downloaded ZIP. Ctrl+C stops the server. If port 4173 is occupied, use `npm start -- --port 4174`.
-
-## Automated workflows
-
-| Workflow | What the app does |
-| --- | --- |
-| Quickdraw | Opens an issue, closes it immediately and checks the five-minute window. |
-| Pull Shark | Creates and merges two pull requests with clearly labeled workflow records. |
-| Pair Extraordinaire | Authenticates a second account, adds its GitHub no-reply co-author trailer to a commit and merges its PR. |
-| YOLO | Merges a PR without review, optionally requesting an existing collaborator first. Stops if a review already exists. |
-
-Combine workflows to reuse PRs. Selecting all four creates one issue and two PRs, with co-authorship and the unreviewed merge on the first PR. The only files created are labeled records under `.achievement-studio/`. Existing source is not rewritten. GitHub Desktop is optional: co-author trailers work through GitHub's API too.
-
-**Completed workflow does not mean verified badge.** GitHub evaluates eligibility and issues achievements separately; the app has no achievement-award API and does not promise instant delivery. See your profile's Achievements page after execution. Quickdraw issue eligibility and other achievement criteria may change during GitHub's public preview.
+A responsive PT-BR / English GitHub Pages application with classic-token authentication and GitHub Actions execution. No local installation is required. The API validates the token and identifies the connected account; this is PAT authentication, not an OAuth redirect.
 
 ## Use
 
-1. Read the public guide, download or clone this repository and run `npm start`. Open **http://localhost:4173**. Paste tokens only in this local application.
-2. Create a short-lived **classic PAT** with `public_repo` for public repositories, or `repo` for private repositories. No `admin`, `workflow`, or `delete_repo` scope is needed. Organization SSO can require separate authorization.
-3. Authorize the session and select an initialized, owned, writable, non-fork repository. A dedicated repository is recommended.
-4. Choose workflows. Pair requires a second token belonging to a different account; that token is cleared after the identity check. Use co-authorship with the account holder's agreement.
-5. Review the repository and operations, then execute. Keep the tab open.
-6. Inspect operation links and optionally export the JSON report. Reports exclude tokens. Disconnect clears account state.
+1. Sign in to the GitHub account you want to use and create an expiring classic PAT. For **Actions**, select `repo` and `workflow`. Browser-only execution needs `public_repo` for public repositories or `repo` for private ones.
+2. Paste the token in the Pages application and authorize the session. Check the connected username.
+3. Select an owned, initialized, writable, non-fork repository. Quickdraw needs Issues enabled.
+4. Choose Quickdraw, Pull Shark, Pair Extraordinaire and/or YOLO. For Pair, authenticate a different secondary account with its classic token.
+5. Review the plan and execution engine. **GitHub Actions** is the default. The alternative executes directly from the browser tab.
+6. Execute and inspect operation evidence. Actions continues after the tab closes; the direct-browser option requires the tab to stay open.
 
-Branch protections, required checks and repository rules are never bypassed. A blocked merge leaves its PR and branch available in the execution log. Stop takes effect between requests; a just-opened Quickdraw issue is still closed. Do not blindly repeat a partial run: inspect its report first. Reloading clears the session; reports are downloadable before leaving.
+## Execution engines
 
-## Seven achievement guides and highlights
+| Engine | Behavior |
+| --- | --- |
+| GitHub Actions | The app prepares an owned private `freebadges-actions-v3` executor repository, installs reviewed workflow code, encrypts account tokens and stores them as GitHub repository secrets. It dispatches an execution plan without credentials in workflow inputs. |
+| Browser tab | The Pages app calls GitHub's API directly. No runner repository or Actions secrets are created. |
 
-The studio documents Quickdraw, Pull Shark, Pair Extraordinaire, YOLO, Galaxy Brain, Starstruck and Public Sponsor. Only the first four have automation.
+The Actions executor belongs to the visitor and uses **that account's Actions quota**. The site owner's Pro subscription does not provide an unlimited runner service to visitors.
 
-Starstruck progress uses the largest star count on a single owned, public, non-fork repository, with documented milestones of 16 / 128 / 512 / 4,096. It is an eligibility estimate, not a badge-award check. Stars are never summed or generated.
+Tokens stay in browser memory during the session. Actions mode additionally saves `CLASSIC_PAT` and, for Pair, `COAUTHOR_PAT` as encrypted secrets in the connected user's private executor. They are never stored in this public site repository, browser storage, workflow inputs, artifacts or application logs. The dashboard can remove the saved runner credentials after a completed execution. Tokens can also be revoked in GitHub settings. Closing the tab clears browser credentials; it does not remove Actions secrets or stop a submitted run.
 
-Galaxy Brain requires accepted, helpful Q&A answers in eligible Discussions. GitHub disabled achievements in `github.com/orgs/community`; see the [official announcement](https://github.com/orgs/community/discussions/106536). Public Sponsor requires GitHub Sponsors; external donations do not automatically qualify.
+Secret encryption uses self-hosted TweetNaCl and libsodium-compatible sealed boxes. The installer checks executor files and refuses changed code or additional workflows before sending credentials. Actions checks that the token account, execution-plan owner and dispatch actor match. Pair also verifies the expected secondary identity before changing the target repository. Workflow code and repository rules remain visible and enforced.
 
-The highlights guide explains Pro, Developer Program Member, Security Bug Bounty Hunter, Campus Expert, Security advisory credit and GitHub Star. Historical achievements are identified separately. Program criteria and availability are controlled by GitHub; consult the linked official pages.
+## Automated workflows
 
-## Free Contributions included
+| Workflow | Operations |
+| --- | --- |
+| Quickdraw | Open an issue, close it immediately and verify the five-minute window. |
+| Pull Shark | Create and merge two PRs with labeled records under `.achievement-studio/`. |
+| Pair Extraordinaire | Add the verified secondary account's `Co-authored-by` trailer and merge its PR. GitHub Desktop is optional. |
+| YOLO | Merge a PR without reviews, optionally requesting an existing collaborator first. Refuse a PR that already has reviews. |
 
-[Free Contributions](https://github.com/brunnojob/free-contributions) is integrated in two forms:
+Combined selections reuse PRs: all four use one issue and two PRs. Protected branches and required checks are never bypassed. Partial runs retain links for inspection. Stop in browser mode acts between requests; a just-opened Quickdraw issue is still closed. Actions cancellation is requested through GitHub and may take time; already-completed mutations remain.
 
-- **Local browser app:** Preview a date range and generate labeled synthetic Git commits using the connected token. Limit: 1–20 commits/day and 1,500/run, with paced requests. Dates use UTC. Commits are retained on a separate history branch and fast-forwarded to the default branch only if it has not changed. No force push. A stopped or blocked run retains its history branch for inspection.
-- **Original CLI:** Vendored unchanged in `vendor/free-contributions/` under its ISC license, including its date planner. Requires Node.js 22+ and Git; supports larger ranges and up to 1,000 commits/day.
+**Completed operations do not verify a badge award.** GitHub evaluates eligibility and issues achievements separately. The app does not promise instant delivery or claim to read awarded badges through an API.
+
+## Seven achievements and highlights
+
+Guides cover Quickdraw, Pull Shark, Pair Extraordinaire, YOLO, Galaxy Brain, Starstruck and Public Sponsor. Only the first four are automated. Starstruck uses the maximum stars on one owned public non-fork repository, with documented milestones of 16 / 128 / 512 / 4,096. It never sums or generates stars.
+
+Galaxy Brain needs accepted useful Q&A answers in eligible Discussions; achievements are disabled in GitHub's `community` organization. Public Sponsor requires GitHub Sponsors; external donations do not automatically qualify. Program highlights include Pro, Developer Program Member, Campus Expert, Security Bug Bounty Hunter, Security advisory credit and GitHub Star, with official links. Historical/experimental achievements are identified separately.
+
+## Free Contributions
+
+The online calendar previews and generates explicitly labeled synthetic history, through Actions or this browser tab. Choose UTC start/end dates through today and 1–20 commits/day, up to 1,500 commits/run. Requests are paced. A separate history branch preserves progress and only fast-forwards the default branch without force if it has not changed. Repeated runs add another batch.
+
+GitHub graph eligibility depends on the account email, eligible branch/repository and private-contribution visibility. Processing may take up to 24 hours; exact green shades are not guaranteed. The original [Free Contributions](https://github.com/brunnojob/free-contributions) CLI remains under `vendor/free-contributions/` with its ISC license as an optional developer utility.
+
+## Development
+
+Node.js 22+, no npm dependencies to install:
 
 ```sh
-node vendor/free-contributions/index.js --start 2024-01-01 --end 2024-12-31 --per-day 5
-# Preview only. Apply in a separate clean Git repository with your identity configured:
-node vendor/free-contributions/index.js --start 2024-01-01 --end 2024-12-31 --per-day 5 --repo ../my-history --apply --push
-```
-
-Synthetic activity is explicitly labeled. GitHub contribution eligibility depends on the account email, eligible branch and repository type. Private contributions require visibility settings. Processing may take up to 24 hours; exact green shades are not guaranteed. Repeating a run adds another batch.
-
-## Local development
-
-```sh
-npm run dev
-# http://localhost:4173
 npm test
+npm run build
+npm run dev
 ```
 
-Node.js 22+; no package installation or build required. `npm start` and `npm run dev` serve `app/` on 127.0.0.1 only. The application rejects remote hostnames. GitHub Pages serves the guide in `docs/`, with a CSP that disables network connections. `npm run guide` previews the guide locally. Tests use mocked GitHub responses for mutation workflows and real temporary Git repositories for the vendored CLI. Automated tests do not verify actual badge awards.
+`docs/` is the Pages application; `docs/guide/` is the public walkthrough. `scripts/build-runner.mjs` packages the exact runner sources into `docs/js/runner-manifest.js`; CI checks that the packaged code matches reviewed sources. `scripts/actions-runner.mjs` is the background entry point. It exports a JSON operation report and a GitHub job summary without credentials. The executor workflow accepts only plan data and reads tokens from GitHub Secrets.
 
-## Existing history auditor
-
-The original Python and Ruby Git collaboration auditors are retained:
-
-```sh
-python main.py . --limit 200
-ruby audit.rb . --limit 200
-ruby -Ilib test/git_audit_test.rb
-python -m unittest discover -s cloud
-```
-
-The optional `cloud/sync.py` report archive is separate from the browser app; the app never invokes it. Existing proof artifacts describe the earlier audit implementation, not this studio's badge automation.
+Tests cover API flows, private-executor validation, token-free dispatch inputs, account matching, run correlation, encryption interoperability, contribution planning and the original CLI in temporary Git repositories. They do not test actual badge awards. Existing Python/Ruby history auditors and the optional `cloud/sync.py` report archive are retained independently.
 
 ## License
 
-Original code: [MIT](LICENSE). Vendored Free Contributions: [ISC](vendor/free-contributions/LICENSE). Maintained by [brunnodev.store](https://brunnodev.store).
+Original code: [MIT](LICENSE). Free Contributions CLI: [ISC](vendor/free-contributions/LICENSE). Browser crypto dependencies retain their [licenses](docs/vendor/crypto/NOTICE.md). Maintained by [brunnodev.store](https://brunnodev.store).
