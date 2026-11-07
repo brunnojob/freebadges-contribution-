@@ -1,4 +1,4 @@
-import {repoPath,refPath,randomId} from './github.js';
+import {repoPath,refPath,randomId} from './github.js?v=3.0.1';
 export class Workflows {
   constructor(api,{log=()=>{},halt=()=>false,sleep=ms=>new Promise(r=>setTimeout(r,ms)),id=()=>randomId()}={}) {
     Object.assign(this,{api,log,halt,sleep,id}); this.receipts=[];
