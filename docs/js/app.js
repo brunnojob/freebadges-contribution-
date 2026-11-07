@@ -1,7 +1,7 @@
-import {GitHub,starProgress,datesPlan} from './github.js';
-import {Workflows} from './workflows.js';
-import {copy,badges,highlights} from './content.js';
-import {ActionsRunner} from './actions.js';
+import {GitHub,starProgress,datesPlan} from './github.js?v=3.0.1';
+import {Workflows} from './workflows.js?v=3.0.1';
+import {copy,badges,highlights} from './content.js?v=3.0.1';
+import {ActionsRunner} from './actions.js?v=3.0.1';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let secondaryApi, runState, runnerRepo, executionMode='actions';
 let lang=navigator.language.startsWith('pt')?'pt':'en',tab=0,step=0,api,user,repos=[],repo,coauthor,selected=new Set(['quickdraw']),reviewer='',busy=false,stopped=false,receipts=[],failure='',historyDates=[],historyInput={start:`${new Date().getUTCFullYear()}-01-01`,end:new Date().toISOString().slice(0,10),daily:1},reportTime='';
