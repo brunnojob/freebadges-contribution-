@@ -1,0 +1,40 @@
+export class GitHub {
+  #token;
+  constructor(token, transport = fetch) { this.#token = token.trim(); this.transport = transport; }
+  clear() { this.#token = ''; }
+  async request(path, method = 'GET', body) {
+    if (!this.#token) throw new Error('AUTH_REQUIRED');
+    if (!path.startsWith('/') || path.startsWith('//') || path.includes('://')) throw new Error('INVALID_PATH');
+    const response = await this.transport(`https://api.github.com${path}`, {
+      method, redirect: 'error', headers: { Authorization: `Bearer ${this.#token}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', ...(body ? {'Content-Type':'application/json'} : {}) },
+      body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(30000)
+    });
+    if (!response.ok) {
+      const err = new Error(response.status === 401 ? 'INVALID_TOKEN' : response.status === 403 || response.status === 429 ? 'PERMISSION_OR_RATE_LIMIT' : response.status === 409 ? 'CONFLICT' : response.status === 422 ? 'VALIDATION_OR_RULES' : `HTTP_${response.status}`);
+      err.status = response.status; err.retryAfter = response.headers.get('retry-after'); throw err;
+    }
+    return response.status === 204 ? null : response.json();
+  }
+  async all(path) {
+    const values = [];
+    for (let page=1; ; page++) {
+      const items = await this.request(`${path}${path.includes('?')?'&':'?'}per_page=100&page=${page}`);
+      values.push(...items); if(items.length < 100) return values;
+    }
+  }
+}
+export const repoPath = name => '/repos/' + name.split('/').map(encodeURIComponent).join('/');
+export const refPath = name => name.split('/').map(encodeURIComponent).join('/');
+export function starProgress(repos, login) {
+  const owned = repos.filter(r => r.owner.login === login && !r.fork && !r.private);
+  const best = owned.reduce((a,b)=>b.stargazers_count > (a?.stargazers_count ?? -1) ? b : a, null);
+  const stars = best?.stargazers_count ?? 0;
+  return {best, stars, next:[16,128,512,4096].find(n=>n>stars) ?? null};
+}
+export function datesPlan(start,end,perDay,today=new Date().toISOString().slice(0,10)) {
+  const valid = s => /^\d{4}-\d{2}-\d{2}$/.test(s) && Number.isFinite(Date.parse(s)) && new Date(s).toISOString().slice(0,10)===s;
+  if (!valid(start)||!valid(end)||start<'1970-01-01'||start>end||end>today||!Number.isInteger(perDay)||perDay<1||perDay>20) throw new Error('INVALID_DATES');
+  const days = Math.round((Date.parse(end)-Date.parse(start))/86400000)+1;
+  if(days*perDay>1500) throw new Error('PLAN_TOO_LARGE');
+  return Array.from({length:days},(_,i)=>new Date(Date.parse(start)+i*86400000).toISOString().slice(0,10)).flatMap(day=>Array.from({length:perDay},(_,i)=>`${day}T12:${String(Math.floor(i/60)).padStart(2,'0')}:${String(i%60).padStart(2,'0')}Z`));
+}
