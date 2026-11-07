@@ -50,3 +50,6 @@ Object.assign(copy.pt,{privacy:'Sessão em memória · Secrets na sua conta',eli
 copy.en.logNames['runner-ready']='Private executor prepared';copy.pt.logNames['runner-ready']='Executor privado preparado';
 
 copy.en.cancelActions='Request Actions cancellation';copy.pt.cancelActions='Solicitar cancelamento no Actions';
+
+Object.assign(copy.en.errors,{NETWORK_ERROR:'The browser could not reach the GitHub API. Check your connection or an extension/network filter and try again. Your token was not saved.',REQUEST_TIMEOUT:'GitHub did not respond in time. Try again.',INVALID_API_RESPONSE:'GitHub returned an unexpected response. Try again.'});
+Object.assign(copy.pt.errors,{NETWORK_ERROR:'O navegador não conseguiu acessar a API do GitHub. Confira sua conexão ou uma extensão/filtro de rede e tente novamente. Seu token não foi salvo.',REQUEST_TIMEOUT:'O GitHub não respondeu a tempo. Tente novamente.',INVALID_API_RESPONSE:'O GitHub retornou uma resposta inesperada. Tente novamente.'});

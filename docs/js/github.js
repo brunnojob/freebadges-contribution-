@@ -5,15 +5,21 @@ export class GitHub {
   async request(path, method = 'GET', body) {
     if (!this.#token) throw new Error('AUTH_REQUIRED');
     if (!path.startsWith('/') || path.startsWith('//') || path.includes('://')) throw new Error('INVALID_PATH');
-    const response = await this.transport(`https://api.github.com${path}`, {
+    // Native browser fetch must be called without binding this GitHub instance.
+    const send=this.transport;
+    let response;
+    try { response = await send(`https://api.github.com${path}`, {
       method, redirect: 'error', headers: { Authorization: `Bearer ${this.#token}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', ...(body ? {'Content-Type':'application/json'} : {}) },
       body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(30000)
-    });
+    }); } catch(error) {
+      throw new Error(['TimeoutError','AbortError'].includes(error.name)?'REQUEST_TIMEOUT':'NETWORK_ERROR');
+    }
     if (!response.ok) {
       const err = new Error(response.status === 401 ? 'INVALID_TOKEN' : response.status === 403 || response.status === 429 ? 'PERMISSION_OR_RATE_LIMIT' : response.status === 409 ? 'CONFLICT' : response.status === 422 ? 'VALIDATION_OR_RULES' : `HTTP_${response.status}`);
       err.status = response.status; err.retryAfter = response.headers.get('retry-after'); throw err;
     }
-    return response.status === 204 ? null : response.json();
+    if(response.status===204)return null;
+    try{return await response.json();}catch{throw new Error('INVALID_API_RESPONSE');}
   }
   async saveEncryptedSecret(repository,name,encrypt) {
     return this.encryptFor(this,repository,name,encrypt);
