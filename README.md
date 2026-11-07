@@ -1,10 +1,20 @@
 # Achievement Studio
 
-**Four GitHub workflows. Seven achievement guides. One browser session.**
+**A public step-by-step guide. Four GitHub workflows running on localhost.**
 
-[Open the studio](https://brunnojob.github.io/freebadges-contribution-/) · [GitHub achievement reference](https://docs.github.com/en/account-and-profile/reference/profile-reference)
+[Read the step-by-step guide](https://brunnojob.github.io/freebadges-contribution-/) · [GitHub achievement reference](https://docs.github.com/en/account-and-profile/reference/profile-reference)
 
-A dependency-free, responsive PT-BR / English dashboard for running GitHub workflows in repositories you own. Connect a classic personal access token, select your repository, choose workflows, review the plan and execute. The token is held only in memory and sent directly to `api.github.com`; there is no application backend, analytics or token storage.
+The GitHub Pages site at https://brunnojob.github.io/freebadges-contribution-/ is a public PT-BR / English guide only. It contains no authentication form and makes no GitHub API calls. It is independent from devstart-lab.
+
+The automation dashboard runs on your own computer at **http://localhost:4173**. Connect a classic personal access token from the account you want to use, select an owned repository, choose workflows, review the plan and execute. Pair Extraordinaire also needs a classic token from a different secondary account. Tokens stay in session memory and go directly to `api.github.com`. Internet access is required; localhost describes where the interface runs.
+
+```sh
+git clone https://github.com/brunnojob/freebadges-contribution-.git
+cd freebadges-contribution-
+npm start
+```
+
+Install Node.js 22+ first; no npm install is needed. Open http://localhost:4173 and keep the terminal open. On Windows, you can instead run `start-windows.cmd` after extracting the downloaded ZIP. Ctrl+C stops the server. If port 4173 is occupied, use `npm start -- --port 4174`.
 
 ## Automated workflows
 
@@ -21,7 +31,7 @@ Combine workflows to reuse PRs. Selecting all four creates one issue and two PRs
 
 ## Use
 
-1. Open the studio or run it locally below.
+1. Read the public guide, download or clone this repository and run `npm start`. Open **http://localhost:4173**. Paste tokens only in this local application.
 2. Create a short-lived **classic PAT** with `public_repo` for public repositories, or `repo` for private repositories. No `admin`, `workflow`, or `delete_repo` scope is needed. Organization SSO can require separate authorization.
 3. Authorize the session and select an initialized, owned, writable, non-fork repository. A dedicated repository is recommended.
 4. Choose workflows. Pair requires a second token belonging to a different account; that token is cleared after the identity check. Use co-authorship with the account holder's agreement.
@@ -44,7 +54,7 @@ The highlights guide explains Pro, Developer Program Member, Security Bug Bounty
 
 [Free Contributions](https://github.com/brunnojob/free-contributions) is integrated in two forms:
 
-- **Browser:** Preview a date range and generate labeled synthetic Git commits using the connected token. Limit: 1–20 commits/day and 1,500/run, with paced requests. Dates use UTC. Commits are retained on a separate history branch and fast-forwarded to the default branch only if it has not changed. No force push. A stopped or blocked run retains its history branch for inspection.
+- **Local browser app:** Preview a date range and generate labeled synthetic Git commits using the connected token. Limit: 1–20 commits/day and 1,500/run, with paced requests. Dates use UTC. Commits are retained on a separate history branch and fast-forwarded to the default branch only if it has not changed. No force push. A stopped or blocked run retains its history branch for inspection.
 - **Original CLI:** Vendored unchanged in `vendor/free-contributions/` under its ISC license, including its date planner. Requires Node.js 22+ and Git; supports larger ranges and up to 1,000 commits/day.
 
 ```sh
@@ -63,7 +73,7 @@ npm run dev
 npm test
 ```
 
-Node.js 22+; no package installation or build required. GitHub Pages serves `docs/`. Tests use mocked GitHub responses for mutation workflows and real temporary Git repositories for the vendored CLI. Automated tests do not verify actual badge awards.
+Node.js 22+; no package installation or build required. `npm start` and `npm run dev` serve `app/` on 127.0.0.1 only. The application rejects remote hostnames. GitHub Pages serves the guide in `docs/`, with a CSP that disables network connections. `npm run guide` previews the guide locally. Tests use mocked GitHub responses for mutation workflows and real temporary Git repositories for the vendored CLI. Automated tests do not verify actual badge awards.
 
 ## Existing history auditor
 

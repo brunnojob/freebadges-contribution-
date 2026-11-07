@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {GitHub,starProgress,datesPlan} from '../docs/js/github.js';
-import {Workflows} from '../docs/js/workflows.js';
+import {GitHub,starProgress,datesPlan} from '../app/js/github.js';
+import {Workflows} from '../app/js/workflows.js';
 const repo={full_name:'alice/demo',owner:{login:'alice'},permissions:{push:true},default_branch:'main',has_issues:true,allow_merge_commit:true};
 function mock({reviewed=false,changed=false,blocked=false,historyMoved=false}={}){
  const calls=[];let pr=0,commits=0;
