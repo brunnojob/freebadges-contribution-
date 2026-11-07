@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "test": "node --test test-web/*.test.js",
-    "dev": "node scripts/serve.mjs"
+    "dev": "node scripts/serve.mjs",
+    "start": "node scripts/serve.mjs",
+    "guide": "node scripts/serve.mjs --guide"
   },
   "engines": {
     "node": ">=22"
