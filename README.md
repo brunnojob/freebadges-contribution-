@@ -1,41 +1,83 @@
-# Git Collaboration Audit
+# Achievement Studio
 
-[View execution evidence](https://brunnojob.github.io/devstart-lab/proofs/pair-extraordinaire-badge/)
+**Four GitHub workflows. Seven achievement guides. One browser session.**
 
-An audit of Git history, authors, co-author trailers, file changes, and collaboration associated with substantive changes.
+[Open the studio](https://brunnojob.github.io/freebadges-contribution-/) · [GitHub achievement reference](https://docs.github.com/en/account-and-profile/reference/profile-reference)
 
-## Run
+A dependency-free, responsive PT-BR / English dashboard for running GitHub workflows in repositories you own. Connect a classic personal access token, select your repository, choose workflows, review the plan and execute. The token is held only in memory and sent directly to `api.github.com`; there is no application backend, analytics or token storage.
 
-Requirements: Python 3.11+ and Git.
+## Automated workflows
+
+| Workflow | What the app does |
+| --- | --- |
+| Quickdraw | Opens an issue, closes it immediately and checks the five-minute window. |
+| Pull Shark | Creates and merges two pull requests with clearly labeled workflow records. |
+| Pair Extraordinaire | Authenticates a second account, adds its GitHub no-reply co-author trailer to a commit and merges its PR. |
+| YOLO | Merges a PR without review, optionally requesting an existing collaborator first. Stops if a review already exists. |
+
+Combine workflows to reuse PRs. Selecting all four creates one issue and two PRs, with co-authorship and the unreviewed merge on the first PR. The only files created are labeled records under `.achievement-studio/`. Existing source is not rewritten. GitHub Desktop is optional: co-author trailers work through GitHub's API too.
+
+**Completed workflow does not mean verified badge.** GitHub evaluates eligibility and issues achievements separately; the app has no achievement-award API and does not promise instant delivery. See your profile's Achievements page after execution. Quickdraw issue eligibility and other achievement criteria may change during GitHub's public preview.
+
+## Use
+
+1. Open the studio or run it locally below.
+2. Create a short-lived **classic PAT** with `public_repo` for public repositories, or `repo` for private repositories. No `admin`, `workflow`, or `delete_repo` scope is needed. Organization SSO can require separate authorization.
+3. Authorize the session and select an initialized, owned, writable, non-fork repository. A dedicated repository is recommended.
+4. Choose workflows. Pair requires a second token belonging to a different account; that token is cleared after the identity check. Use co-authorship with the account holder's agreement.
+5. Review the repository and operations, then execute. Keep the tab open.
+6. Inspect operation links and optionally export the JSON report. Reports exclude tokens. Disconnect clears account state.
+
+Branch protections, required checks and repository rules are never bypassed. A blocked merge leaves its PR and branch available in the execution log. Stop takes effect between requests; a just-opened Quickdraw issue is still closed. Do not blindly repeat a partial run: inspect its report first. Reloading clears the session; reports are downloadable before leaving.
+
+## Seven achievement guides and highlights
+
+The studio documents Quickdraw, Pull Shark, Pair Extraordinaire, YOLO, Galaxy Brain, Starstruck and Public Sponsor. Only the first four have automation.
+
+Starstruck progress uses the largest star count on a single owned, public, non-fork repository, with documented milestones of 16 / 128 / 512 / 4,096. It is an eligibility estimate, not a badge-award check. Stars are never summed or generated.
+
+Galaxy Brain requires accepted, helpful Q&A answers in eligible Discussions. GitHub disabled achievements in `github.com/orgs/community`; see the [official announcement](https://github.com/orgs/community/discussions/106536). Public Sponsor requires GitHub Sponsors; external donations do not automatically qualify.
+
+The highlights guide explains Pro, Developer Program Member, Security Bug Bounty Hunter, Campus Expert, Security advisory credit and GitHub Star. Historical achievements are identified separately. Program criteria and availability are controlled by GitHub; consult the linked official pages.
+
+## Free Contributions included
+
+[Free Contributions](https://github.com/brunnojob/free-contributions) is integrated in two forms:
+
+- **Browser:** Preview a date range and generate labeled synthetic Git commits using the connected token. Limit: 1–20 commits/day and 1,500/run, with paced requests. Dates use UTC. Commits are retained on a separate history branch and fast-forwarded to the default branch only if it has not changed. No force push. A stopped or blocked run retains its history branch for inspection.
+- **Original CLI:** Vendored unchanged in `vendor/free-contributions/` under its ISC license, including its date planner. Requires Node.js 22+ and Git; supports larger ranges and up to 1,000 commits/day.
 
 ```sh
-python main.py . --limit 200 > result.json
+node vendor/free-contributions/index.js --start 2024-01-01 --end 2024-12-31 --per-day 5
+# Preview only. Apply in a separate clean Git repository with your identity configured:
+node vendor/free-contributions/index.js --start 2024-01-01 --end 2024-12-31 --per-day 5 --repo ../my-history --apply --push
 ```
 
-## Behavior
+Synthetic activity is explicitly labeled. GitHub contribution eligibility depends on the account email, eligible branch and repository type. Private contributions require visibility settings. Processing may take up to 24 hours; exact green shades are not guaranteed. Repeating a run adds another batch.
 
-The tool reads existing history. Invalid trailers are included in the report. Badge automation files and artificial logs are excluded from the count of substantive changes.
+## Local development
 
-## Optional report archive
+```sh
+npm run dev
+# http://localhost:4173
+npm test
+```
 
-Export a JSON report from the command above, then run `python cloud/sync.py enqueue result.json --project pair-extraordinaire-badge` and `python cloud/sync.py sync`. Synchronization requires `BRUNNODEV_ACCESS_TOKEN` and the external operations API; the local outbox retains unacknowledged reports.
+Node.js 22+; no package installation or build required. GitHub Pages serves `docs/`. Tests use mocked GitHub responses for mutation workflows and real temporary Git repositories for the vendored CLI. Automated tests do not verify actual badge awards.
+
+## Existing history auditor
+
+The original Python and Ruby Git collaboration auditors are retained:
+
+```sh
+python main.py . --limit 200
+ruby audit.rb . --limit 200
+ruby -Ilib test/git_audit_test.rb
+python -m unittest discover -s cloud
+```
+
+The optional `cloud/sync.py` report archive is separate from the browser app; the app never invokes it. Existing proof artifacts describe the earlier audit implementation, not this studio's badge automation.
 
 ## License
 
-Original source and documentation are MIT licensed; see [LICENSE](LICENSE). Third-party dependencies and media retain their respective terms. Maintained by [Brunno Dev](https://brunnodev.store).
-
-## Implementation update
-
-The Ruby implementation in `audit.rb` audits real Git history with bounded subprocess output, timeouts, validated references and trailer placement checks. Run `ruby audit.rb . --limit 200` and `ruby -Ilib test/git_audit_test.rb`. The previous Python entry point is retained for compatibility.
-
-Contribution trailer: `Co-authored-by: nyctophile <33561761+ineedfoundmyway@users.noreply.github.com>`.
-
-## Execution proof
-
-[![Executable proof](https://github.com/brunnojob/pair-extraordinaire-badge/actions/workflows/proof.yml/badge.svg)](https://github.com/brunnojob/pair-extraordinaire-badge/actions/workflows/proof.yml)
-
-![Recorded program execution](docs/proof/execution.svg)
-
-[Verified run](https://github.com/brunnojob/pair-extraordinaire-badge/actions/runs/38017969572) · [Execution report](docs/proof/evidence.json)
-
-Run `python .proof/record.py` after installing the prerequisites above. The scenarios execute repository code and verify exit codes and expected output. CI publishes `execution-proof` with the transcript, input fingerprints and source commit. The downloadable report identifies the exact tested version; the workflow badge tracks the latest run.
+Original code: [MIT](LICENSE). Vendored Free Contributions: [ISC](vendor/free-contributions/LICENSE). Maintained by [brunnodev.store](https://brunnodev.store).
