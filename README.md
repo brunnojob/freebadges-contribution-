@@ -1,10 +1,18 @@
 # Freebadges Contribution
 
-**Connect your GitHub account. Choose a repository. Execute online.**
+**Run GitHub achievement workflows and generate labeled contribution history from your browser.**
 
-[Open the app](https://brunnojob.github.io/freebadges-contribution-/) · [Step-by-step guide](https://brunnojob.github.io/freebadges-contribution-/guide/)
+[**Open the app**](https://brunnojob.github.io/freebadges-contribution-/) · [Step-by-step guide](https://brunnojob.github.io/freebadges-contribution-/guide/) · [Contribute](CONTRIBUTING.md)
 
-A responsive PT-BR / English GitHub Pages application with classic-token authentication and GitHub Actions execution. No local installation is required. The API validates the token and identifies the connected account; this is PAT authentication, not an OAuth redirect.
+[![Studio tests](https://github.com/brunnojob/freebadges-contribution-/actions/workflows/studio.yml/badge.svg)](https://github.com/brunnojob/freebadges-contribution-/actions/workflows/studio.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-a684ff.svg)](LICENSE)
+
+[![Freebadges Contribution running in the browser: account connection and workflow navigation](docs/assets/dashboard.webp)](https://brunnojob.github.io/freebadges-contribution-/)
+
+**No installation.** Open the app, connect your classic GitHub token, choose an owned repository and review the execution plan. For background Actions execution, select `repo` and `workflow` when creating the token. Pair Extraordinaire also needs a different secondary account.
+
+Four workflows: **Quickdraw · Pull Shark · Pair Extraordinaire · YOLO**. Seven achievement guides, live Starstruck milestone estimates, a contribution calendar and PT-BR / English support. Actions runs in your own private executor; direct-browser execution is also available.
+
+GitHub controls badge eligibility and timing. Completed workflows confirm operations, not a guaranteed badge award. Synthetic contribution history is explicitly labeled.
 
 ## Use
 
@@ -70,3 +78,5 @@ Tests cover API flows, private-executor validation, token-free dispatch inputs, 
 ## License
 
 Original code: [MIT](LICENSE). Free Contributions CLI: [ISC](vendor/free-contributions/LICENSE). Browser crypto dependencies retain their [licenses](docs/vendor/crypto/NOTICE.md). Maintained by [brunnodev.store](https://brunnodev.store).
+
+If this saved you time, a star helps other developers find it.

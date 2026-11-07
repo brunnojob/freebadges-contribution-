@@ -1,0 +1,16 @@
+{
+  "description": "Run GitHub achievement workflows and generate labeled contribution history from your browser. GitHub Pages + per-user Actions. PT-BR / EN.",
+  "homepage": "https://brunnojob.github.io/freebadges-contribution-/",
+  "topics": [
+    "github",
+    "github-actions",
+    "github-pages",
+    "github-api",
+    "automation",
+    "javascript",
+    "developer-tools",
+    "github-achievements",
+    "contribution-graph",
+    "open-source"
+  ]
+}
