@@ -1,13 +1,12 @@
 {
   "name": "github-achievement-studio",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test test-web/*.test.js",
     "dev": "node scripts/serve.mjs",
-    "start": "node scripts/serve.mjs",
-    "guide": "node scripts/serve.mjs --guide"
+    "build": "node scripts/build-runner.mjs"
   },
   "engines": {
     "node": ">=22"

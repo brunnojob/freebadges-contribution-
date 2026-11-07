@@ -15,6 +15,15 @@ export class GitHub {
     }
     return response.status === 204 ? null : response.json();
   }
+  async saveEncryptedSecret(repository,name,encrypt) {
+    return this.encryptFor(this,repository,name,encrypt);
+  }
+  async encryptFor(ownerApi,repository,name,encrypt) {
+    if (!this.#token) throw new Error('AUTH_REQUIRED');
+    const p=repoPath(repository),key=await ownerApi.request(`${p}/actions/secrets/public-key`);
+    const encrypted_value=encrypt(this.#token,key.key);
+    return ownerApi.request(`${p}/actions/secrets/${name}`,'PUT',{encrypted_value,key_id:key.key_id});
+  }
   async all(path) {
     const values = [];
     for (let page=1; ; page++) {
@@ -37,4 +46,11 @@ export function datesPlan(start,end,perDay,today=new Date().toISOString().slice(
   const days = Math.round((Date.parse(end)-Date.parse(start))/86400000)+1;
   if(days*perDay>1500) throw new Error('PLAN_TOO_LARGE');
   return Array.from({length:days},(_,i)=>new Date(Date.parse(start)+i*86400000).toISOString().slice(0,10)).flatMap(day=>Array.from({length:perDay},(_,i)=>`${day}T12:${String(Math.floor(i/60)).padStart(2,'0')}:${String(i%60).padStart(2,'0')}Z`));
+}
+
+export function randomId(source=crypto) {
+  if(source.randomUUID)return source.randomUUID();
+  const bytes=source.getRandomValues(new Uint8Array(16));bytes[6]=(bytes[6]&15)|64;bytes[8]=(bytes[8]&63)|128;
+  const hex=Array.from(bytes,n=>n.toString(16).padStart(2,'0')).join('');
+  return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
 }

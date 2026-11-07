@@ -1,6 +1,6 @@
-import {repoPath,refPath} from './github.js';
+import {repoPath,refPath,randomId} from './github.js';
 export class Workflows {
-  constructor(api,{log=()=>{},halt=()=>false,sleep=ms=>new Promise(r=>setTimeout(r,ms)),id=()=>crypto.randomUUID()}={}) {
+  constructor(api,{log=()=>{},halt=()=>false,sleep=ms=>new Promise(r=>setTimeout(r,ms)),id=()=>randomId()}={}) {
     Object.assign(this,{api,log,halt,sleep,id}); this.receipts=[];
   }
   record(kind,url,extra={}) { const item={kind,url,...extra}; this.receipts.push(item); this.log(item); }
