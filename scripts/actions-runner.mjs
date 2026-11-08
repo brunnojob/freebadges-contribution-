@@ -1,6 +1,6 @@
 import {writeFile,appendFile} from 'node:fs/promises';
 import {GitHub,datesPlan} from '../docs/js/github.js';
-import {Workflows} from '../docs/js/workflows.js';
+import {Workflows,validEmail,pullCount} from '../docs/js/workflows.js';
 export function validatePlan(value) {
   if(!value||typeof value!=='object'||!['badges','history'].includes(value.kind)||!Array.isArray(value.modes)||value.modes.some(m=>!['quickdraw','pullshark','pair','yolo'].includes(m))||new Set(value.modes).size!==value.modes.length)throw new Error('INVALID_PLAN');
   if(!/^[A-Za-z0-9-]{1,39}\/[A-Za-z0-9_.-]{1,100}$/.test(value.repository)||!/^[A-Za-z0-9-]{1,39}$/.test(value.account)||value.repository.split('/')[0].toLowerCase()!==value.account.toLowerCase())throw new Error('INVALID_PLAN');
@@ -8,6 +8,8 @@ export function validatePlan(value) {
   if(value.kind==='badges'&&!value.modes.length)throw new Error('INVALID_PLAN');
   if(value.kind==='badges'&&value.modes.includes('pair')&&!/^[A-Za-z0-9-]{1,39}$/.test(value.coauthor||''))throw new Error('INVALID_PLAN');
   if(value.kind==='history')datesPlan(value.start,value.end,value.daily);
+  if(value.pullRequests!==undefined)pullCount(value.pullRequests);
+  if(value.modes.includes('pair')&&(value.authorEmail!==undefined||value.coauthorEmail!==undefined)){if(!validEmail(value.authorEmail)||!validEmail(value.coauthorEmail)||value.authorEmail.toLowerCase()===value.coauthorEmail.toLowerCase())throw new Error('INVALID_PAIR_EMAIL');}
   return value;
 }
 export async function runPlan(plan,{api,secondaryApi,actor,engineFactory=api=>new Workflows(api)}={}) {
@@ -17,7 +19,7 @@ export async function runPlan(plan,{api,secondaryApi,actor,engineFactory=api=>ne
   if(plan.modes.includes('pair')){if(!secondaryApi)throw new Error('PAIR_REQUIRED');coauthor=await secondaryApi.request('/user');if(coauthor.login.toLowerCase()!==(plan.coauthor||'').toLowerCase()||coauthor.login===user.login)throw new Error('PAIR_REQUIRED');}
   const engine=engineFactory(api),repo=await engine.preflight(plan.repository,user);
   if(plan.kind==='history')await engine.contributions(repo,user,datesPlan(plan.start,plan.end,plan.daily));
-  else await engine.run(repo,plan.modes,{coauthor,reviewer:plan.reviewer||undefined});
+  else await engine.run(repo,plan.modes,{coauthor,author:user,authorEmail:plan.authorEmail,coauthorEmail:plan.coauthorEmail,pullRequests:plan.pullRequests??2,reviewer:plan.reviewer||undefined});
   return engine.receipts;
 }
 async function main(){
