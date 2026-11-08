@@ -14,6 +14,20 @@ Four workflows: **Quickdraw · Pull Shark · Pair Extraordinaire · YOLO**. Seve
 
 GitHub controls badge eligibility and timing. Completed workflows confirm operations, not a guaranteed badge award. Synthetic contribution history is explicitly labeled.
 
+## Quick start
+
+[Open the hosted app](https://brunnojob.github.io/freebadges-contribution-/) — no installation required. Connect your classic token, choose your repository and review the workflow plan.
+
+For contributors who want to run the interface locally, install Node.js 22+ and copy:
+
+```sh
+git clone https://github.com/brunnojob/freebadges-contribution-.git
+cd freebadges-contribution-
+npm run dev
+```
+
+Open the local URL printed in your terminal. Local preview is optional; the public app runs on GitHub Pages and executes background jobs through GitHub Actions.
+
 ## Use
 
 1. Sign in to the GitHub account you want to use and create an expiring classic PAT. For **Actions**, select `repo` and `workflow`. Browser-only execution needs `public_repo` for public repositories or `repo` for private ones.
