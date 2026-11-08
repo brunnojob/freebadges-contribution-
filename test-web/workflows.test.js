@@ -46,3 +46,25 @@ test('API errors never include server response or token',async()=>{const api=new
 
 test('request does not bind the GitHub instance as native fetch receiver',async()=>{let receiver;const api=new GitHub('dummy',async function(){receiver=this;return {ok:true,status:200,json:async()=>({login:'test'})};});assert.deepEqual(await api.request('/user'),{login:'test'});assert.equal(receiver,undefined);});
 test('network, timeout and non-JSON failures have distinct credential-free errors',async()=>{for(const [name,expected]of [['TypeError','NETWORK_ERROR'],['TimeoutError','REQUEST_TIMEOUT']]){const api=new GitHub('dummy',async()=>{const e=new Error('hidden transport details');e.name=name;throw e;});await assert.rejects(api.request('/user'),e=>e.message===expected);}const api=new GitHub('dummy',async()=>({ok:true,status:200,json:async()=>{throw new Error('invalid');}}));await assert.rejects(api.request('/user'),/INVALID_API_RESPONSE/);});
+
+test('ineligible optional reviewer does not block combined Pair and Pull Shark',async()=>{
+ const api=mock(),request=api.request.bind(api);api.request=async(path,method,body)=>{if(path.endsWith('/requested_reviewers')){const e=new Error('VALIDATION_OR_RULES');e.status=422;throw e;}return request(path,method,body);};
+ const w=new Workflows(api,{sleep:async()=>{}});await w.run(repo,['pair','pullshark','yolo'],{coauthor:{id:2,login:'bob'},reviewer:'not-a-collaborator'});
+ assert.equal(w.receipts.filter(r=>r.kind==='pr-merged').length,2);assert.equal(w.receipts.find(r=>r.kind==='review-request-skipped').status,422);
+ assert.match(api.calls.find(c=>c.path.includes('/contents/')).body.message,/Co-authored-by: bob <2\+bob@users.noreply.github.com>/);
+});
+test('GitHub can take more than five polls to compute mergeability without duplicating PRs',async()=>{
+ const api=mock(),request=api.request.bind(api);let reads=0;api.request=async(path,method,body)=>{const result=await request(path,method,body);if(/\/pulls\/\d+$/.test(path)&&(!method||method==='GET')){reads++;if(reads<=7)result.mergeable=null;}return result;};
+ const w=new Workflows(api,{sleep:async()=>{}});await w.run(repo,['pair'],{coauthor:{id:2,login:'bob'}});assert.equal(reads,8);assert.equal(w.receipts.filter(r=>r.kind==='pr-opened').length,1);assert.equal(w.receipts.filter(r=>r.kind==='pr-merged').length,1);
+});
+test('temporary 405 merge response is retried with the expected head SHA',async()=>{
+ const api=mock(),request=api.request.bind(api);let merges=0;api.request=async(path,method,body)=>{if(path.endsWith('/merge')&&++merges===1){const e=new Error('HTTP_405');e.status=405;throw e;}return request(path,method,body);};
+ const w=new Workflows(api,{sleep:async()=>{}});await w.run(repo,['pullshark']);assert.equal(w.receipts.filter(r=>r.kind==='pr-merged').length,2);assert.ok(api.calls.filter(c=>c.path.endsWith('/merge')).every(c=>c.body.sha==='pr-sha'));
+});
+test('branch-required reviews/checks are not bypassed while waiting for merges',async()=>{
+ const api=mock(),request=api.request.bind(api);api.request=async(path,method,body)=>{const result=await request(path,method,body);if(/\/pulls\/\d+$/.test(path)&&(!method||method==='GET'))result.mergeable_state='blocked';return result;};
+ await assert.rejects(new Workflows(api,{sleep:async()=>{}}).run(repo,['pullshark']),/MERGE_BLOCKED/);assert.ok(!api.calls.some(c=>c.path.endsWith('/merge')));
+});
+test('Pair retains co-author trailer when the repository only allows squash merges',async()=>{
+ const api=mock(),w=new Workflows(api,{sleep:async()=>{}});await w.run({...repo,allow_merge_commit:false,allow_squash_merge:true},['pair'],{coauthor:{id:2,login:'bob'}});const merge=api.calls.find(c=>c.path.endsWith('/merge'));assert.equal(merge.body.merge_method,'squash');assert.match(merge.body.commit_message,/Co-authored-by: bob/);
+});

@@ -27,8 +27,8 @@ async function main(){
   const plan=validatePlan(JSON.parse(process.env.PLAN_JSON||'null'));
   const log=item=>{report.operations.push({...item,time:new Date().toISOString()});console.log(`${item.kind}${item.progress?' '+item.progress+'/'+item.total:''}`);};
   await runPlan(plan,{api,secondaryApi,actor:process.env.GITHUB_ACTOR,engineFactory:a=>new Workflows(a,{log})});
- }catch(e){failed=true;report.error=/^[A-Z_0-9]+$/.test(e.message)?e.message:'EXECUTION_FAILED';console.error(report.error);}
- finally{api.clear();secondaryApi?.clear();await writeFile('execution-report.json',JSON.stringify(report,null,2));if(process.env.GITHUB_STEP_SUMMARY)await appendFile(process.env.GITHUB_STEP_SUMMARY,`## Freebadges Contribution\n\n${failed?'Execution stopped. Inspect the report before repeating.':'GitHub operations completed. Badge issuance is evaluated separately by GitHub.'}\n\n${report.operations.map(r=>`- ${r.kind}: ${r.url}`).join('\n')}\n`);}
+ }catch(e){failed=true;report.error=/^[A-Z_0-9]+$/.test(e.message)?e.message:'EXECUTION_FAILED';report.errorDetails={status:e.status||null,endpoint:e.endpoint||null,method:e.method||null};console.error(report.error);if(e.status)console.error(`GitHub API: ${e.method} ${e.endpoint} (HTTP ${e.status})`);}
+ finally{api.clear();secondaryApi?.clear();await writeFile('execution-report.json',JSON.stringify(report,null,2));if(process.env.GITHUB_STEP_SUMMARY)await appendFile(process.env.GITHUB_STEP_SUMMARY,`## Freebadges Contribution\n\n${failed?'Execution stopped. Inspect the report before repeating.':'GitHub operations completed. Badge issuance is evaluated separately by GitHub.'}\n\n${failed?`Error: ${report.error}\n\n${report.errorDetails?.method||''} ${report.errorDetails?.endpoint||''} ${report.errorDetails?.status||''}\n\n`:''}${report.operations.map(r=>`- ${r.kind}: ${r.url}`).join('\n')}\n`);}
  if(failed)process.exitCode=1;
 }
 if(process.env.FREEBADGES_RUNNER==='1')await main();

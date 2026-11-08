@@ -53,3 +53,11 @@ copy.en.cancelActions='Request Actions cancellation';copy.pt.cancelActions='Soli
 
 Object.assign(copy.en.errors,{NETWORK_ERROR:'The browser could not reach the GitHub API. Check your connection or an extension/network filter and try again. Your token was not saved.',REQUEST_TIMEOUT:'GitHub did not respond in time. Try again.',INVALID_API_RESPONSE:'GitHub returned an unexpected response. Try again.'});
 Object.assign(copy.pt.errors,{NETWORK_ERROR:'O navegador não conseguiu acessar a API do GitHub. Confira sua conexão ou uma extensão/filtro de rede e tente novamente. Seu token não foi salvo.',REQUEST_TIMEOUT:'O GitHub não respondeu a tempo. Tente novamente.',INVALID_API_RESPONSE:'O GitHub retornou uma resposta inesperada. Tente novamente.'});
+
+copy.pt.logNames['review-request-skipped']='Revisor opcional não elegível; solicitação ignorada';
+copy.en.logNames['review-request-skipped']='Optional reviewer unavailable; request skipped';
+copy.pt.logNames['merge-pending']='Aguardando cálculo de merge no GitHub';copy.en.logNames['merge-pending']='Waiting for GitHub merge readiness';
+Object.assign(copy.pt.errors,{MERGE_BLOCKED:'As regras da branch bloqueiam o merge. Confira os checks e as revisões exigidas no PR.',MERGE_REJECTED:'O GitHub não liberou o merge durante a espera. O PR foi preservado; confira o link antes de repetir.'});
+Object.assign(copy.en.errors,{MERGE_BLOCKED:'Branch rules block this merge. Check required checks and reviews on the PR.',MERGE_REJECTED:'GitHub did not allow the merge within the wait window. The PR was retained; inspect its link before repeating.'});
+copy.pt.reviewerHelp='Opcional. Use um colaborador existente. Se o GitHub não aceitar a solicitação para esse usuário, o fluxo continua sem solicitá-la. As regras de merge continuam valendo.';
+copy.en.reviewerHelp='Optional. Use an existing collaborator. If GitHub cannot request that user, the flow continues without the request. Merge rules still apply.';
