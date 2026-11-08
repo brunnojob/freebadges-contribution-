@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.0.2
+
+- Skip optional reviewer requests rejected as ineligible instead of stopping combined PR workflows.
+- Wait longer for merge readiness and retry transient merge failures with the expected PR head.
+- Upgrade recognized previous private executors before starting a new run.
+- Include safe API endpoint and HTTP status details in Actions failure reports.
+
 ## 3.0.1
 
 - Public PT-BR / English GitHub Pages dashboard with classic-token authentication.

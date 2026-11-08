@@ -16,7 +16,7 @@ export class GitHub {
     }
     if (!response.ok) {
       const err = new Error(response.status === 401 ? 'INVALID_TOKEN' : response.status === 403 || response.status === 429 ? 'PERMISSION_OR_RATE_LIMIT' : response.status === 409 ? 'CONFLICT' : response.status === 422 ? 'VALIDATION_OR_RULES' : `HTTP_${response.status}`);
-      err.status = response.status; err.retryAfter = response.headers.get('retry-after'); throw err;
+      err.status = response.status; err.endpoint=path.split('?')[0]; err.method=method; err.retryAfter = response.headers.get('retry-after'); throw err;
     }
     if(response.status===204)return null;
     try{return await response.json();}catch{throw new Error('INVALID_API_RESPONSE');}

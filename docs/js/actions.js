@@ -1,5 +1,6 @@
-import {repoPath,randomId} from './github.js?v=3.0.1';
-import {runnerFiles} from './runner-manifest.js?v=3.0.1';
+import {repoPath,randomId} from './github.js?v=3.0.2';
+import {runnerFiles} from './runner-manifest.js?v=3.0.2';
+import {trustedPreviousRunners} from './runner-history.js?v=3.0.2';
 const runnerName='freebadges-actions-v3';
 export const encodeText=text=>btoa(String.fromCharCode(...new TextEncoder().encode(text)));
 const decodeText=base64=>new TextDecoder().decode(Uint8Array.from(atob(base64.replace(/\s/g,'')),c=>c.charCodeAt(0)));
@@ -15,15 +16,23 @@ export class ActionsRunner {
     try{repo=await this.api.request(p);}catch(e){if(e.status!==404)throw e;repo=await this.api.request('/user/repos','POST',{name:runnerName,private:true,auto_init:true,description:'Private GitHub Actions executor for Freebadges Contribution'});this.log('runner-created');repo=await this.api.request(p);}
     if(repo.owner.login!==user.login||!repo.private||!repo.permissions?.admin||repo.archived)throw new Error('PRIVATE_RUNNER_REQUIRED');
     for(let i=0;i<8;i++){try{await this.api.request(`${p}/git/ref/heads/${repo.default_branch.split('/').map(encodeURIComponent).join('/')}`);break;}catch(e){if(![404,409].includes(e.status))throw e;if(i===7)throw new Error('RUNNER_PENDING');await this.sleep(2000);}}
-    // Validate executable code before depositing any credentials.
-    const paths=Object.keys(runnerFiles);
-    for(const path of paths) {
+    // Check all installed sources and workflow names before changing code or depositing secrets.
+    const updates=[];
+    for(const path of Object.keys(runnerFiles)) {
       let file;try{file=await this.api.request(`${p}/contents/${path}`);}catch(e){if(e.status!==404)throw e;}
-      if(file){if(decodeText(file.content)!==runnerFiles[path])throw new Error('RUNNER_CHANGED');}
-      else{await this.api.request(`${p}/contents/${path}`,'PUT',{message:'Install Freebadges Actions executor',branch:repo.default_branch,content:encodeText(runnerFiles[path])});}
+      if(file){
+        const content=decodeText(file.content);
+        if(content===runnerFiles[path])continue;
+        if(!trustedPreviousRunners.some(version=>version[path]===content))throw new Error('RUNNER_CHANGED');
+      }
+      updates.push({path,sha:file?.sha});
     }
-    const workflows=await this.api.request(`${p}/contents/.github/workflows`);
+    let workflows=[];
+    try{workflows=await this.api.request(`${p}/contents/.github/workflows`);}catch(e){if(e.status!==404)throw e;}
     if(workflows.some(f=>f.name!=='achievement-runner.yml'))throw new Error('RUNNER_CHANGED');
+    for(const {path,sha} of updates){
+      await this.api.request(`${p}/contents/${path}`,'PUT',{message:sha?'Update reviewed Freebadges executor':'Install Freebadges Actions executor',branch:repo.default_branch,content:encodeText(runnerFiles[path]),...(sha?{sha}:{})});
+    }
     const workflow=`${p}/actions/workflows/achievement-runner.yml`;
     for(let i=0;i<8;i++){
       try{const w=await this.api.request(workflow);if(w.state!=='active')await this.api.request(`${workflow}/enable`,'PUT');return {...repo,full_name:fullName};}

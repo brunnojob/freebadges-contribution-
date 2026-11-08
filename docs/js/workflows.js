@@ -1,4 +1,4 @@
-import {repoPath,refPath,randomId} from './github.js?v=3.0.1';
+import {repoPath,refPath,randomId} from './github.js?v=3.0.2';
 export class Workflows {
   constructor(api,{log=()=>{},halt=()=>false,sleep=ms=>new Promise(r=>setTimeout(r,ms)),id=()=>randomId()}={}) {
     Object.assign(this,{api,log,halt,sleep,id}); this.receipts=[];
@@ -37,25 +37,41 @@ export class Workflows {
     this.record('commit-created',file.commit.html_url,{sha}); this.checkpoint();
     const pr=await this.api.request(`${p}/pulls`,'POST',{title:'docs: record GitHub workflow demonstration',head:branch,base:repo.default_branch,body:'Automated workflow demonstration. This PR adds only a clearly labeled record under `.achievement-studio/`. Badge eligibility is evaluated by GitHub.'});
     this.record('pr-opened',pr.html_url,{number:pr.number});
-    if(reviewer) await this.api.request(`${p}/pulls/${pr.number}/requested_reviewers`,'POST',{reviewers:[reviewer]});
-    for(let attempt=0;attempt<5;attempt++) {
+    if(reviewer) {
+      try { await this.api.request(`${p}/pulls/${pr.number}/requested_reviewers`,'POST',{reviewers:[reviewer]}); }
+      catch(error) {
+        // Reviewer requests are optional; an ineligible reviewer must not block unrelated flows.
+        if(![404,422].includes(error.status))throw error;
+        this.record('review-request-skipped',pr.html_url,{reviewer,status:error.status});
+      }
+    }
+    let rejected=false;
+    for(let attempt=0;attempt<20;attempt++) {
       this.checkpoint(); const state=await this.api.request(`${p}/pulls/${pr.number}`);
       if(state.head.sha!==sha) throw new Error('PR_HEAD_CHANGED');
-      if(state.mergeable===null) {await this.sleep(1000);continue;}
+      if(state.merged) {this.record('pr-merged',pr.html_url,{sha:state.merge_commit_sha});return;}
+      if(state.mergeable===null) {if(attempt===0)this.record('merge-pending',pr.html_url);await this.sleep(Math.min(1000+attempt*250,3000));continue;}
       if(state.mergeable===false) throw new Error('MERGE_CONFLICT');
+      if(state.mergeable_state==='blocked')throw new Error('MERGE_BLOCKED');
       if(yolo) {
         const reviews=await this.api.all(`${p}/pulls/${pr.number}/reviews`);
         if(reviews.length) throw new Error('YOLO_ALREADY_REVIEWED');
       }
       const method=repo.allow_merge_commit?'merge':repo.allow_squash_merge?'squash':repo.allow_rebase_merge?'rebase':null;
       if(!method)throw new Error('MERGE_METHOD_UNAVAILABLE');
-      const result=await this.api.request(`${p}/pulls/${pr.number}/merge`,'PUT',{sha,merge_method:method,...(method==='squash'?{commit_title:'docs: record achievement workflow',commit_message:message}:{})});
+      let result;
+      try {result=await this.api.request(`${p}/pulls/${pr.number}/merge`,'PUT',{sha,merge_method:method,...(method==='squash'?{commit_title:'docs: record achievement workflow',commit_message:message}:{})});}
+      catch(error){
+        if(![405,409,502,503].includes(error.status)&&!['NETWORK_ERROR','REQUEST_TIMEOUT'].includes(error.message))throw error;
+        // Re-read GitHub's state before retrying an ambiguous or not-yet-ready merge.
+        rejected=true;await this.sleep(Math.min(1000+attempt*250,3000));continue;
+      }
       if(!result.merged)throw new Error('MERGE_NOT_CONFIRMED');
       this.record('pr-merged',pr.html_url,{sha:result.sha});
       try {await this.api.request(`${p}/git/refs/heads/${refPath(branch)}`,'DELETE');} catch {this.record('branch-retained',`https://github.com/${repo.full_name}/tree/${branch}`);}
       return;
     }
-    throw new Error('MERGEABILITY_PENDING');
+    throw new Error(rejected?'MERGE_REJECTED':'MERGEABILITY_PENDING');
   }
   async run(repo,modes,{coauthor,reviewer}={}) {
     if(modes.includes('pair') && !coauthor)throw new Error('PAIR_REQUIRED');
