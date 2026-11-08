@@ -62,3 +62,15 @@ test('unknown executor modification aborts before updating any known-old files',
  const api={async request(path,method='GET'){calls.push({path,method});const file=Object.keys(old).find(f=>path.endsWith('/contents/'+f));if(file)return {content:Buffer.from(file==='docs/js/workflows.js'?'unreviewed-code':old[file]).toString('base64'),sha:'old'};return repo;}};
  await assert.rejects(new ActionsRunner(api).prepare(user),/RUNNER_CHANGED/);assert.ok(!calls.some(c=>c.method!=='GET'));
 });
+
+test('Actions forwards target author, both emails and custom PR count under either selected account',async()=>{
+ for(const [target,other] of [['alice','bob'],['bob','alice']]){let options;
+ const plan={kind:'badges',account:target,repository:target+'/target',modes:['pair','pullshark'],coauthor:other,authorEmail:target+'@example.com',coauthorEmail:other+'@example.com',pullRequests:16};
+ await runPlan(plan,{api:{request:async()=>({login:target})},secondaryApi:{request:async()=>({login:other})},actor:target,engineFactory:()=>({receipts:[],preflight:async(name,u)=>{assert.equal(name,target+'/target');assert.equal(u.login,target);return {};},run:async(r,m,o)=>options=o})});
+ assert.equal(options.author.login,target);assert.equal(options.coauthor.login,other);assert.equal(options.authorEmail,plan.authorEmail);assert.equal(options.coauthorEmail,plan.coauthorEmail);assert.equal(options.pullRequests,16);
+ }
+});
+test('Actions validates custom count and email fields before API access',()=>{
+ for(const pullRequests of [0,-1,1.1,'16',null])assert.throws(()=>validatePlan({...valid,pullRequests}),/INVALID_PULL_COUNT/);
+ assert.throws(()=>validatePlan({...valid,modes:['pair'],coauthor:'bob',authorEmail:'alice@example.com',coauthorEmail:'bob@example.com\nmalicious'}),/INVALID_PAIR_EMAIL/);
+});

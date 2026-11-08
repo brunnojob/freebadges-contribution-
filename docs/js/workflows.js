@@ -1,4 +1,11 @@
-import {repoPath,refPath,randomId} from './github.js?v=3.0.2';
+import {repoPath,refPath,randomId} from './github.js?v=3.1.0';
+export function validEmail(value) {return typeof value==='string'&&value.length<=254&&/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(value);}
+export function pullCount(value=2) {if(!Number.isSafeInteger(value)||value<1)throw new Error('INVALID_PULL_COUNT');return value;}
+export function pairIdentity(coauthor,authorEmail,coauthorEmail,author) {
+  if(!coauthor||!author||coauthor.login===author.login)throw new Error('PAIR_REQUIRED');
+  if(!validEmail(authorEmail)||!validEmail(coauthorEmail)||authorEmail.toLowerCase()===coauthorEmail.toLowerCase())throw new Error('INVALID_PAIR_EMAIL');
+  return {author:{name:author.login,email:authorEmail},coauthor:{...coauthor,email:coauthorEmail}};
+}
 export class Workflows {
   constructor(api,{log=()=>{},halt=()=>false,sleep=ms=>new Promise(r=>setTimeout(r,ms)),id=()=>randomId()}={}) {
     Object.assign(this,{api,log,halt,sleep,id}); this.receipts=[];
@@ -23,7 +30,7 @@ export class Workflows {
     this.record('issue-closed',closed.html_url,{seconds});
     if(seconds<0 || seconds>=300) throw new Error('QUICKDRAW_WINDOW_MISSED');
   }
-  async pull(repo,{coauthor,reviewer,yolo=false}={}) {
+  async pull(repo,{coauthor,author,reviewer,yolo=false}={}) {
     this.checkpoint(); const p=repoPath(repo.full_name), branch=`achievement-studio/${this.id()}`;
     const head=await this.api.request(`${p}/git/ref/heads/${refPath(repo.default_branch)}`);
     await this.api.request(`${p}/git/refs`,'POST',{ref:`refs/heads/${branch}`,sha:head.object.sha});
@@ -31,8 +38,8 @@ export class Workflows {
     this.checkpoint();
     const path=`.achievement-studio/${branch.split('/')[1]}.md`;
     const content=`# Achievement Studio workflow record\n\nAutomated GitHub workflow demonstration.\n\nMode: ${coauthor?'co-authored commit':reviewer?'unreviewed pull request':'pull request lifecycle'}\n`;
-    const message='docs: record achievement workflow'+(coauthor?`\n\nCo-authored-by: ${coauthor.name || coauthor.login} <${coauthor.id}+${coauthor.login}@users.noreply.github.com>`:'');
-    const file=await this.api.request(`${p}/contents/${path}`,'PUT',{branch,message,content:btoa(content)});
+    const message='docs: record achievement workflow'+(coauthor?`\n\nCo-authored-by: ${coauthor.name?.replace(/[\r\n<>]/g,' ').trim()||coauthor.login} <${coauthor.email||`${coauthor.id}+${coauthor.login}@users.noreply.github.com`}>`:'');
+    const file=await this.api.request(`${p}/contents/${path}`,'PUT',{branch,message,content:btoa(content),...(author?{author}:{})});
     const sha=file.commit.sha;
     this.record('commit-created',file.commit.html_url,{sha}); this.checkpoint();
     const pr=await this.api.request(`${p}/pulls`,'POST',{title:'docs: record GitHub workflow demonstration',head:branch,base:repo.default_branch,body:'Automated workflow demonstration. This PR adds only a clearly labeled record under `.achievement-studio/`. Badge eligibility is evaluated by GitHub.'});
@@ -73,12 +80,14 @@ export class Workflows {
     }
     throw new Error(rejected?'MERGE_REJECTED':'MERGEABILITY_PENDING');
   }
-  async run(repo,modes,{coauthor,reviewer}={}) {
+  async run(repo,modes,{coauthor,reviewer,author,authorEmail,coauthorEmail,pullRequests=2}={}) {
+    const count=pullCount(pullRequests);
+    if(modes.includes('pair')&&(authorEmail!==undefined||coauthorEmail!==undefined)){const identity=pairIdentity(coauthor,authorEmail,coauthorEmail,author);author=identity.author;coauthor=identity.coauthor;}
     if(modes.includes('pair') && !coauthor)throw new Error('PAIR_REQUIRED');
     if(modes.includes('quickdraw'))await this.quickdraw(repo);
     // Pair can also supply the first Pull Shark PR; YOLO can share the same merge.
-    const pulls=modes.includes('pullshark')?2:modes.some(m=>m==='pair'||m==='yolo')?1:0;
-    for(let i=0;i<pulls;i++)await this.pull(repo,{coauthor:i===0&&modes.includes('pair')?coauthor:undefined,reviewer:i===0&&modes.includes('yolo')?reviewer:undefined,yolo:i===0&&modes.includes('yolo')});
+    const pulls=modes.includes('pullshark')?count:modes.some(m=>m==='pair'||m==='yolo')?1:0;
+    for(let i=0;i<pulls;i++){if(i)await this.sleep(1100);await this.pull(repo,{author:i===0&&modes.includes('pair')?author:undefined,coauthor:i===0&&modes.includes('pair')?coauthor:undefined,reviewer:i===0&&modes.includes('yolo')?reviewer:undefined,yolo:i===0&&modes.includes('yolo')});}
   }
   async contributions(repo,user,dates) {
     this.checkpoint(); const p=repoPath(repo.full_name), branch=`achievement-studio/history-${this.id()}`;

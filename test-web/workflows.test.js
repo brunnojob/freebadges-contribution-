@@ -68,3 +68,17 @@ test('branch-required reviews/checks are not bypassed while waiting for merges',
 test('Pair retains co-author trailer when the repository only allows squash merges',async()=>{
  const api=mock(),w=new Workflows(api,{sleep:async()=>{}});await w.run({...repo,allow_merge_commit:false,allow_squash_merge:true},['pair'],{coauthor:{id:2,login:'bob'}});const merge=api.calls.find(c=>c.path.endsWith('/merge'));assert.equal(merge.body.merge_method,'squash');assert.match(merge.body.commit_message,/Co-authored-by: bob/);
 });
+
+test('custom Pull Shark count creates exactly the requested PRs and merges',async()=>{
+ const api=mock(),w=new Workflows(api,{sleep:async()=>{}});await w.run(repo,['pullshark','pair'],{pullRequests:5,author:{login:'alice'},coauthor:{id:2,login:'bob'},authorEmail:'alice@example.com',coauthorEmail:'bob@example.com'});
+ assert.equal(w.receipts.filter(r=>r.kind==='pr-opened').length,5);assert.equal(w.receipts.filter(r=>r.kind==='pr-merged').length,5);
+ const files=api.calls.filter(c=>c.path.includes('/contents/'));assert.deepEqual(files[0].body.author,{name:'alice',email:'alice@example.com'});assert.match(files[0].body.message,/\n\nCo-authored-by: bob <bob@example.com>$/);assert.ok(files.slice(1).every(c=>!c.body.message.includes('Co-authored-by:')));
+});
+test('invalid counts and coauthor emails fail before any issue or PR is created',async()=>{
+ for(const pullRequests of [0,-1,1.5,NaN,Infinity,'4',Number.MAX_SAFE_INTEGER+1]){const api=mock();await assert.rejects(new Workflows(api).run(repo,['quickdraw','pullshark'],{pullRequests}),/INVALID_PULL_COUNT/);assert.equal(api.calls.length,0);}
+ for(const coauthorEmail of ['bad','a@example.com\nCo-authored-by: fake <x@y.io>','a@example.com','x <a@b.com>']){const api=mock();await assert.rejects(new Workflows(api).run(repo,['quickdraw','pair'],{author:{login:'alice'},coauthor:{login:'bob'},authorEmail:'a@example.com',coauthorEmail}),/INVALID_PAIR_EMAIL/);assert.equal(api.calls.length,0);}
+});
+test('Pair custom email trailer survives squash merging and single-PR batches',async()=>{
+ const api=mock();await new Workflows(api).run({...repo,allow_merge_commit:false,allow_squash_merge:true},['pair','pullshark'],{pullRequests:1,author:{login:'alice'},coauthor:{login:'bob',name:'Bob'},authorEmail:'alice@example.com',coauthorEmail:'bob@example.com'});
+ const merge=api.calls.find(c=>c.path.endsWith('/merge'));assert.match(merge.body.commit_message,/Co-authored-by: Bob <bob@example.com>$/);assert.equal(api.calls.filter(c=>c.path.endsWith('/merge')).length,1);
+});

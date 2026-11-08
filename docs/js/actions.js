@@ -1,6 +1,6 @@
-import {repoPath,randomId} from './github.js?v=3.0.2';
-import {runnerFiles} from './runner-manifest.js?v=3.0.2';
-import {trustedPreviousRunners} from './runner-history.js?v=3.0.2';
+import {repoPath,randomId} from './github.js?v=3.1.0';
+import {runnerFiles} from './runner-manifest.js?v=3.1.0';
+import {trustedPreviousRunners} from './runner-history.js?v=3.1.0';
 const runnerName='freebadges-actions-v3';
 export const encodeText=text=>btoa(String.fromCharCode(...new TextEncoder().encode(text)));
 const decodeText=base64=>new TextDecoder().decode(Uint8Array.from(atob(base64.replace(/\s/g,'')),c=>c.charCodeAt(0)));

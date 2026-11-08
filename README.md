@@ -8,7 +8,7 @@
 
 [![Freebadges Contribution running in the browser: account connection and workflow navigation](docs/assets/dashboard.webp)](https://brunnojob.github.io/freebadges-contribution-/)
 
-**No installation.** Open the app, connect your classic GitHub token, choose an owned repository and review the execution plan. For background Actions execution, select `repo` and `workflow` when creating the token. Pair Extraordinaire also needs a different secondary account.
+**No installation.** Open the app, connect classic GitHub tokens from two different accounts, choose an owned repository and review the execution plan. For background Actions execution, select `repo` and `workflow` when creating the token. Choose the destination account before selecting its repository. For Pair, enter emails linked to both authenticated accounts; the app builds the `Co-authored-by` trailer automatically.
 
 Four workflows: **Quickdraw · Pull Shark · Pair Extraordinaire · YOLO**. Seven achievement guides, live Starstruck milestone estimates, a contribution calendar and PT-BR / English support. Actions runs in your own private executor; direct-browser execution is also available.
 
@@ -30,10 +30,10 @@ Open the local URL printed in your terminal. Local preview is optional; the publ
 
 ## Use
 
-1. Sign in to the GitHub account you want to use and create an expiring classic PAT. For **Actions**, select `repo` and `workflow`. Browser-only execution needs `public_repo` for public repositories or `repo` for private ones.
-2. Paste the token in the Pages application and authorize the session. Check the connected username.
+1. Create an expiring classic PAT in each of two different GitHub accounts. For **Actions**, select `repo` and `workflow`. Browser-only execution needs `public_repo` for public repositories or `repo` for private ones.
+2. Paste both tokens in the Pages application and authorize the session. Choose the destination account; the other account becomes its Pair co-author.
 3. Select an owned, initialized, writable, non-fork repository. Quickdraw needs Issues enabled.
-4. Choose Quickdraw, Pull Shark, Pair Extraordinaire and/or YOLO. For Pair, authenticate a different secondary account with its classic token.
+4. Choose Quickdraw, Pull Shark, Pair Extraordinaire and/or YOLO. For Pull Shark, choose the exact positive integer PR count. For Pair, enter the main author’s and co-author’s linked emails, then inspect the generated trailer. Emails are commit metadata and are public in public repositories; the app cannot verify their account association.
 5. Review the plan and execution engine. **GitHub Actions** is the default. The alternative executes directly from the browser tab.
 6. Execute and inspect operation evidence. Actions continues after the tab closes; the direct-browser option requires the tab to stay open.
 
@@ -46,7 +46,7 @@ Open the local URL printed in your terminal. Local preview is optional; the publ
 
 The Actions executor belongs to the visitor and uses **that account's Actions quota**. The site owner's Pro subscription does not provide an unlimited runner service to visitors.
 
-Tokens stay in browser memory during the session. Actions mode additionally saves `CLASSIC_PAT` and, for Pair, `COAUTHOR_PAT` as encrypted secrets in the connected user's private executor. They are never stored in this public site repository, browser storage, workflow inputs, artifacts or application logs. The dashboard can remove the saved runner credentials after a completed execution. Tokens can also be revoked in GitHub settings. Closing the tab clears browser credentials; it does not remove Actions secrets or stop a submitted run.
+Both tokens stay in browser memory until disconnect or tab closure; changing the destination account swaps their roles. Actions dispatch does not clear browser credentials, so another run can reuse the session. Actions mode additionally saves `CLASSIC_PAT` and, for Pair, `COAUTHOR_PAT` as encrypted secrets in the connected user's private executor. They are never stored in this public site repository, browser storage, workflow inputs, artifacts or application logs. The dashboard can remove the saved runner credentials after a completed execution. Tokens can also be revoked in GitHub settings. Closing the tab clears browser credentials; it does not remove Actions secrets or stop a submitted run.
 
 Secret encryption uses self-hosted TweetNaCl and libsodium-compatible sealed boxes. The installer checks executor files and refuses changed code or additional workflows before sending credentials. Actions checks that the token account, execution-plan owner and dispatch actor match. Pair also verifies the expected secondary identity before changing the target repository. Workflow code and repository rules remain visible and enforced.
 
@@ -55,11 +55,11 @@ Secret encryption uses self-hosted TweetNaCl and libsodium-compatible sealed box
 | Workflow | Operations |
 | --- | --- |
 | Quickdraw | Open an issue, close it immediately and verify the five-minute window. |
-| Pull Shark | Create and merge two PRs with labeled records under `.achievement-studio/`. |
-| Pair Extraordinaire | Add the verified secondary account's `Co-authored-by` trailer and merge its PR. GitHub Desktop is optional. |
+| Pull Shark | Create and merge the chosen number of PRs (default: 2) with labeled records under `.achievement-studio/`. |
+| Pair Extraordinaire | Set the destination account as commit author and format the other authenticated account’s email as a `Co-authored-by` trailer and merge its PR. GitHub Desktop is optional. |
 | YOLO | Merge a PR without reviews, optionally requesting an existing collaborator first. Refuse a PR that already has reviews. |
 
-Combined selections reuse PRs: all four use one issue and two PRs. Protected branches and required checks are never bypassed. Partial runs retain links for inspection. Stop in browser mode acts between requests; a just-opened Quickdraw issue is still closed. Actions cancellation is requested through GitHub and may take time; already-completed mutations remain.
+Combined selections reuse PRs: all four use one issue and the chosen Pull Shark PR count. Pair and YOLO share the first PR. PRs are paced sequentially; large batches remain subject to API limits, Actions quota and the 60-minute job timeout. Protected branches and required checks are never bypassed. Partial runs retain links for inspection. Stop in browser mode acts between requests; a just-opened Quickdraw issue is still closed. Actions cancellation is requested through GitHub and may take time; already-completed mutations remain.
 
 **Completed operations do not verify a badge award.** GitHub evaluates eligibility and issues achievements separately. The app does not promise instant delivery or claim to read awarded badges through an API.
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.1.0
+
+- Authenticate two accounts and select the destination before choosing its owned repository.
+- Set the main commit author email and generate the co-author trailer from the second email.
+- Preview identities and emails before execution; preserve account checks in Actions.
+- Configure a positive integer Pull Shark PR count instead of fixing it at two.
+- Upgrade reviewed previous executors automatically.
+
 ## 3.0.2
 
 - Skip optional reviewer requests rejected as ineligible instead of stopping combined PR workflows.

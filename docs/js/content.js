@@ -61,3 +61,26 @@ Object.assign(copy.pt.errors,{MERGE_BLOCKED:'As regras da branch bloqueiam o mer
 Object.assign(copy.en.errors,{MERGE_BLOCKED:'Branch rules block this merge. Check required checks and reviews on the PR.',MERGE_REJECTED:'GitHub did not allow the merge within the wait window. The PR was retained; inspect its link before repeating.'});
 copy.pt.reviewerHelp='Opcional. Use um colaborador existente. Se o GitHub não aceitar a solicitação para esse usuário, o fluxo continua sem solicitá-la. As regras de merge continuam valendo.';
 copy.en.reviewerHelp='Optional. Use an existing collaborator. If GitHub cannot request that user, the flow continues without the request. Merge rules still apply.';
+
+Object.assign(copy.pt,{
+ auth:'Conecte as duas contas',authText:'Crie um token classic em cada conta. Autentique ambas e depois escolha a conta de destino.',
+ twoAccounts:'Use dois tokens de contas diferentes. Para executar pelo Actions em qualquer uma delas, marque repo e workflow nos dois tokens.',
+ recipient:'Conta de destino das badges / dona do repositório',recipientHelp:'Os PRs serão criados e integrados nos repositórios desta conta. A outra será o coautor do Pair. O GitHub avalia a conquista para os participantes.',
+ authorLabel:'Autor principal',pairHelp:'As duas contas já foram autenticadas. Informe os e-mails vinculados às respectivas contas para criar o commit em coautoria e integrar o PR na conta de destino.',
+ emailHelp:'Use um e-mail vinculado à conta correspondente, inclusive seu no-reply do GitHub. Os e-mails serão gravados no commit e ficarão públicos em repositórios públicos. A ferramenta valida o formato, mas não verifica a associação do e-mail à conta.',
+ pullCount:'Quantidade de pull requests',pullCountHelp:'Escolha um número inteiro positivo: 2, 16, 128 ou outro valor. O plano cria e integra essa quantidade em sequência. Lotes grandes podem atingir a cota, os limites da API ou os 60 minutos do Actions; confira os PRs concluídos antes de repetir.',
+});
+Object.assign(copy.en,{
+ auth:'Connect both accounts',authText:'Create a classic token in each account. Authenticate both, then choose the destination account.',
+ twoAccounts:'Use two tokens from different accounts. To execute Actions under either identity, select repo and workflow on both tokens.',
+ recipient:'Badge destination / repository owner',recipientHelp:'PRs are created and merged in this account’s repositories. The other account co-authors the Pair commit. GitHub evaluates achievements for the participants.',
+ authorLabel:'Main author',pairHelp:'Both accounts are authenticated. Enter an email linked to each account to create the co-authored commit and merge its PR in the destination account.',
+ emailHelp:'Use an email linked to the corresponding account, including its GitHub no-reply address. Emails become commit metadata and are public in public repositories. The app validates syntax, but cannot verify account email association.',
+ pullCount:'Number of pull requests',pullCountHelp:'Choose a positive integer: 2, 16, 128 or another value. The plan creates and merges that many PRs sequentially. Large batches may reach quota, API limits or the Actions 60-minute timeout; inspect completed PRs before repeating.',
+});
+copy.pt.descs[1]='Criar e integrar a quantidade de pull requests escolhida.';copy.en.descs[1]='Create and merge your chosen number of pull requests.';
+Object.assign(copy.pt.errors,{INVALID_PAIR_EMAIL:'Informe dois e-mails diferentes e válidos, vinculados às respectivas contas GitHub.',INVALID_PULL_COUNT:'A quantidade de PRs deve ser um número inteiro positivo.'});
+Object.assign(copy.en.errors,{INVALID_PAIR_EMAIL:'Enter two different valid emails linked to the corresponding GitHub accounts.',INVALID_PULL_COUNT:'The PR count must be a positive integer.'});
+
+copy.pt.scope='Para Actions em qualquer conta, marque repo e workflow nos dois tokens. A conta de destino executa os merges; a outra autentica o coautor.';
+copy.en.scope='For Actions under either account, select repo and workflow on both tokens. The destination account executes merges; the other authenticates the co-author.';
