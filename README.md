@@ -6,7 +6,23 @@
 
 [![Studio tests](https://github.com/brunnojob/freebadges-contribution-/actions/workflows/studio.yml/badge.svg)](https://github.com/brunnojob/freebadges-contribution-/actions/workflows/studio.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-a684ff.svg)](LICENSE)
 
-[![Freebadges Contribution running in the browser: account connection and workflow navigation](docs/assets/dashboard.webp)](https://brunnojob.github.io/freebadges-contribution-/)
+## Preview images
+
+### Connect both accounts
+
+![Account connection and workflow navigation](docs/assets/preview-connect.jpg)
+
+### Achievements & highlights
+
+![Achievement guides and Starstruck progress](docs/assets/preview-achievements.jpg)
+
+### Contribution calendar
+
+![Contribution calendar configuration and history preview](docs/assets/preview-calendar.jpg)
+
+### Profile highlights
+
+![Starstruck progress and GitHub profile programs](docs/assets/preview-highlights.jpg)
 
 **No installation.** Open the app, connect classic GitHub tokens from two different accounts, choose an owned repository and review the execution plan. For background Actions execution, select `repo` and `workflow` when creating the token. Choose the destination account before selecting its repository. For Pair, enter emails linked to both authenticated accounts; the app builds the `Co-authored-by` trailer automatically.
 
