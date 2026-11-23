@@ -54,12 +54,12 @@ test('runner manifest exactly matches reviewed sources',async()=>{for(const [fil
 
 test('known previous executor is upgraded with file SHA leases before credential upload',async()=>{
  const {trustedPreviousRunners}=await import('../docs/js/runner-history.js');const old=trustedPreviousRunners[0],calls=[];
- const api={async request(path,method='GET',body){calls.push({path,method,body});if(path.endsWith('/contents/.github/workflows'))return [{name:'achievement-runner.yml'}];if(path.endsWith('/actions/workflows/achievement-runner.yml'))return {state:'active'};const file=Object.keys(old).find(f=>path.endsWith('/contents/'+f));if(file&&method==='GET')return {content:Buffer.from(old[file]).toString('base64'),sha:'old-'+file};return repo;}};
- await new ActionsRunner(api).prepare(user);const updates=calls.filter(c=>c.method==='PUT');assert.ok(updates.length>0);assert.ok(updates.every(c=>c.body.sha?.startsWith('old-')));const firstWrite=calls.findIndex(c=>c.method==='PUT');assert.ok(calls.slice(0,firstWrite).some(c=>c.path.endsWith('/contents/.github/workflows')));assert.ok(!calls.some(c=>c.path.includes('/secrets')));
+ const api={async request(path,method='GET',body){calls.push({path,method,body});if(path.endsWith('/contents/.github/workflows'))return [{name:'achievement-runner.yml'}];if(path.endsWith('/actions/workflows/achievement-runner.yml'))return {state:'active'};const file=Object.keys(runnerFiles).find(f=>path.endsWith('/contents/'+f));if(file&&method==='GET')return old[file]===undefined?undefined:{content:Buffer.from(old[file]).toString('base64'),sha:'old-'+file};return repo;}};
+ await new ActionsRunner(api).prepare(user);const updates=calls.filter(c=>c.method==='PUT');assert.ok(updates.length>0);assert.ok(updates.every(c=>c.path.endsWith('/history-fast-import.mjs')?!c.body.sha:c.body.sha?.startsWith('old-')));const firstWrite=calls.findIndex(c=>c.method==='PUT');assert.ok(calls.slice(0,firstWrite).some(c=>c.path.endsWith('/contents/.github/workflows')));assert.ok(!calls.some(c=>c.path.includes('/secrets')));
 });
 test('unknown executor modification aborts before updating any known-old files',async()=>{
  const {trustedPreviousRunners}=await import('../docs/js/runner-history.js');const old=trustedPreviousRunners[0],calls=[];
- const api={async request(path,method='GET'){calls.push({path,method});const file=Object.keys(old).find(f=>path.endsWith('/contents/'+f));if(file)return {content:Buffer.from(file==='docs/js/workflows.js'?'unreviewed-code':old[file]).toString('base64'),sha:'old'};return repo;}};
+ const api={async request(path,method='GET'){calls.push({path,method});const file=Object.keys(runnerFiles).find(f=>path.endsWith('/contents/'+f));if(file)return old[file]===undefined?undefined:{content:Buffer.from(file==='docs/js/workflows.js'?'unreviewed-code':old[file]).toString('base64'),sha:'old'};return repo;}};
  await assert.rejects(new ActionsRunner(api).prepare(user),/RUNNER_CHANGED/);assert.ok(!calls.some(c=>c.method!=='GET'));
 });
 

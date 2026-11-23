@@ -1,6 +1,7 @@
 import {writeFile,appendFile} from 'node:fs/promises';
 import {GitHub,datesPlan} from '../docs/js/github.js';
 import {Workflows,validEmail,pullCount} from '../docs/js/workflows.js';
+import {publishHistory} from './history-fast-import.mjs';
 export function validatePlan(value) {
   if(!value||typeof value!=='object'||!['badges','history'].includes(value.kind)||!Array.isArray(value.modes)||value.modes.some(m=>!['quickdraw','pullshark','pair','yolo'].includes(m))||new Set(value.modes).size!==value.modes.length)throw new Error('INVALID_PLAN');
   if(!/^[A-Za-z0-9-]{1,39}\/[A-Za-z0-9_.-]{1,100}$/.test(value.repository)||!/^[A-Za-z0-9-]{1,39}$/.test(value.account)||value.repository.split('/')[0].toLowerCase()!==value.account.toLowerCase())throw new Error('INVALID_PLAN');
@@ -18,7 +19,7 @@ export async function runPlan(plan,{api,secondaryApi,actor,engineFactory=api=>ne
   let coauthor;
   if(plan.modes.includes('pair')){if(!secondaryApi)throw new Error('PAIR_REQUIRED');coauthor=await secondaryApi.request('/user');if(coauthor.login.toLowerCase()!==(plan.coauthor||'').toLowerCase()||coauthor.login===user.login)throw new Error('PAIR_REQUIRED');}
   const engine=engineFactory(api),repo=await engine.preflight(plan.repository,user);
-  if(plan.kind==='history')await engine.contributions(repo,user,datesPlan(plan.start,plan.end,plan.daily));
+  if(plan.kind==='history')await publishHistory(repo,user,plan,process.env.CLASSIC_PAT,{record:(kind,url,extra)=>engine.record(kind,url,extra)});
   else await engine.run(repo,plan.modes,{coauthor,author:user,authorEmail:plan.authorEmail,coauthorEmail:plan.coauthorEmail,pullRequests:plan.pullRequests??2,reviewer:plan.reviewer||undefined});
   return engine.receipts;
 }

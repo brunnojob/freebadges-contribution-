@@ -48,10 +48,10 @@ export function starProgress(repos, login) {
 }
 export function datesPlan(start,end,perDay,today=new Date().toISOString().slice(0,10)) {
   const valid = s => /^\d{4}-\d{2}-\d{2}$/.test(s) && Number.isFinite(Date.parse(s)) && new Date(s).toISOString().slice(0,10)===s;
-  if (!valid(start)||!valid(end)||start<'1970-01-01'||start>end||end>today||!Number.isInteger(perDay)||perDay<1||perDay>20) throw new Error('INVALID_DATES');
+  if (!valid(start)||!valid(end)||start<'1970-01-01'||start>end||end>today||!Number.isInteger(perDay)||perDay<4500||perDay>6000) throw new Error('INVALID_DATES');
   const days = Math.round((Date.parse(end)-Date.parse(start))/86400000)+1;
-  if(days*perDay>1500) throw new Error('PLAN_TOO_LARGE');
-  return Array.from({length:days},(_,i)=>new Date(Date.parse(start)+i*86400000).toISOString().slice(0,10)).flatMap(day=>Array.from({length:perDay},(_,i)=>`${day}T12:${String(Math.floor(i/60)).padStart(2,'0')}:${String(i%60).padStart(2,'0')}Z`));
+  if(days*perDay>6000) throw new Error('PLAN_TOO_LARGE');
+  return Array.from({length:days},(_,i)=>new Date(Date.parse(start)+i*86400000).toISOString().slice(0,10)).flatMap(day=>Array.from({length:perDay},(_,i)=>`${day}T${String(Math.floor(i/3600)+12).padStart(2,'0')}:${String(Math.floor(i/60)%60).padStart(2,'0')}:${String(i%60).padStart(2,'0')}Z`));
 }
 
 export function randomId(source=crypto) {

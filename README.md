@@ -87,7 +87,7 @@ Galaxy Brain needs accepted useful Q&A answers in eligible Discussions; achievem
 
 ## Free Contributions
 
-The online calendar previews and generates explicitly labeled synthetic history, through Actions or this browser tab. Choose UTC start/end dates through today and 1–20 commits/day, up to 1,500 commits/run. Requests are paced. A separate history branch preserves progress and only fast-forwards the default branch without force if it has not changed. Repeated runs add another batch.
+The online calendar previews and generates explicitly labeled synthetic history, through Actions. Choose UTC start/end dates through today and 4,500–6,000 commits/day, one day per run. The Actions runner creates commits locally and pushes them without force. A separate history branch preserves progress and only fast-forwards the default branch without force if it has not changed. Repeated runs add another batch.
 
 GitHub graph eligibility depends on the account email, eligible branch/repository and private-contribution visibility. Processing may take up to 24 hours; exact green shades are not guaranteed. The original [Free Contributions](https://github.com/brunnojob/free-contributions) CLI remains under `vendor/free-contributions/` with its ISC license as an optional developer utility.
 
